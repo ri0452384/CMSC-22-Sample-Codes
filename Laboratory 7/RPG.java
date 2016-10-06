@@ -1,4 +1,5 @@
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -8,7 +9,8 @@ import java.util.Scanner;
  * Created by nmenego on 9/29/16.
  */
 public class RPG {
-
+	private static String xd;
+	private static String yd;
     private Random rand;
 
     // constructor
@@ -18,12 +20,14 @@ public class RPG {
 
     // generate a random monster name..
     public String getRandomMonsterName() {
-        String[] adjectives = {"Green", "Slimy", "Bloody", "Smelly"};
-        String[] monsters = {"Ogre", "Elf", "Giant", "Teacher"};
+        String[] adjectives = {"Agressive", "Cunning", "Agile", "Empowered", "Bulky", "Ancient"};
+        String[] monsters = {"Ogre", "Witch", "Harpy", "Dragon", "Minotaur"};
         List<String> adjs = Arrays.asList(adjectives);
         List<String> mons = Arrays.asList(monsters);
-
-        return adjs.get(randInt(0, adjs.size() - 1)) + " " + mons.get(randInt(0, mons.size() - 1));
+        xd = adjs.get(randInt(0, adjs.size() - 1));
+        yd = mons.get(randInt(0, mons.size() - 1));
+        return xd + " " + yd;
+       // return adjs.get(randInt(0, adjs.size() - 1)) + " " + mons.get(randInt(0, mons.size() - 1));
     }
 
     // inclusive random integer
@@ -45,37 +49,66 @@ public class RPG {
             Thread.currentThread().interrupt();
         }
     }
+	
+	public static void clearScr(){
+    //Clears Screen in java
+		try {
+			if (System.getProperty("os.name").contains("Windows"))
+				new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+			else
+				Runtime.getRuntime().exec("clear");
+		} catch (IOException | InterruptedException ex) {}
+	}
 
     // duel two characters, one as attacker, one as defender
     // returns true if someone is killed
     public boolean duel(RPGCharacter attacker, RPGCharacter defender) {
-        System.out.println("--> " + attacker.getName() + " ATK " + defender.getName());
-		int damage = attacker.attack();
+        if(attacker.getStun() <= 0)
+			System.out.println("\n" + attacker.getName() + " attacked " + defender.getName()+"!");
+		int damage = attacker.attack(defender);
+		sleep(1000);
         
-        sleep(2000);
-
-        if (coinToss()!=0) {
-			System.out.println(attacker.getName()+"'s ATK dealt "+damage+" damage.");
-            int remHp = defender.takeDamage(damage);
-            if (remHp == 0) {
-                System.out.printf("--> %s killed %s!\n", attacker.getName(), defender.getName());
-                return true;
-            }else if (remHp < 0) {
-                System.out.printf("--> %s killed %s!\n", attacker.getName(), defender.getName());
-				System.out.println("OVERKILL!");
-                return true;
-            }
-        } else {
-            System.out.println("--> MISSED!");
-        }
+		int remHp = defender.getHp();
+		//attacker is stunned
+		if(attacker.getStun()>0){
+			//no output because the defender cannot move
+			remHp = defender.takeDamage(damage);
+			
+			sleep(1000);
+		}
+		int hit = coinToss();
+		
+		//should go in this else clause if attacker isn't stunned
+		if(attacker.getStun() <=0){
+			
+			if(hit !=0) {
+				System.out.println(attacker.getName() + "'s move might deal "  + damage+" damage"+ " to "+defender.getName()+".\n");
+				remHp = defender.takeDamage(damage);
+				sleep(1000);
+				if (remHp == 0) {
+					System.out.printf("--> %s killed %s!\n", attacker.getName(), defender.getName());
+					sleep(3000);
+					return true;
+				}else if (remHp < 0) {
+					System.out.printf("--> %s killed %s!\n", attacker.getName(), defender.getName());
+					System.out.println("OVERKILL!");
+					sleep(3000);
+					return true;
+				}
+			}else if(hit ==0 ) {
+				System.out.println(attacker.getName()+" missed!");
+			}
+		} 
+		sleep(3000);
         return false;
     }
 
 
     // game...
-    public static void main(String[] args) {
-
+    public static void main(String[] args){
+		clearScr();
         RPG rpg = new RPG();
+		@SuppressWarnings("resource")
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Enter name of Hero");
 		String heroName = sc.nextLine();
@@ -108,27 +141,74 @@ public class RPG {
 		}
 		
 		
-        // TODO take parameters as input via STDIN
-        RPGCharacter monster = new Monster(rpg.getRandomMonsterName(), rpg.randInt(100, 1000), rpg.randInt(1, 100));
+       
+		//// switch case : will depend on random monster from getRandomMonsterName
+		
+		
+		RPGCharacter monster;
+		String[] monName = rpg.getRandomMonsterName().split(" ");
+		
+		switch(monName[1]){
+		
+			case "Ogre":{
+				monster = new Ogre(monName[0]+ " "+monName[1], rpg.randInt(2500, 3500)); 
+				break;
+			}
+			case "Witch":{
+				monster = new Witch(monName[0]+ " "+monName[1], rpg.randInt(1000, 2000)); 
+				break;
+			}
+			case "Harpy":{
+				monster = new Harpy(monName[0]+ " "+monName[1], rpg.randInt(1500, 2500)); 
+				break;
+			}
+			case "Dragon":{
+				monster = new Dragon(monName[0]+ " "+monName[1], rpg.randInt(3000, 4000));; 
+				break;
+		
+			}
+			case "Minotaur":{
+				monster = new Minotaur(monName[0]+ " "+monName[1], rpg.randInt(1000, 2000)); 
+				break;
+		
+			}
+			default: {
+				monster = new Minotaur(monName[0]+ " "+monName[1], rpg.randInt(500, 1500)); 
+			}
+		}
+		
+       // RPGCharacter monster = new Monster(rpg.getRandomMonsterName(), rpg.randInt(500, 1000));
 
         System.out.println("====== GAME START =====");
-        System.out.printf("%s\n%s\n", hero, monster);
+		for(int i = 5; i>0 ; i--){
+			System.out.println(i+"...");
+			rpg.sleep(1000);
+		}
+        
 
         // fight! for version 1, hero will always attack first.
         int count = 0;
         while (true) {
-            System.out.println("== round " + ++count);
+        	clearScr();
+        	System.out.println("========== round "+ ++count +" =============");
+        	
+        	 System.out.printf("%s\n versus \n\n%s\n", hero, monster);
+            
             // hero's turn
             boolean monsterIsDead = rpg.duel(hero, monster);
             if (monsterIsDead) break;
-
+			
             // monster's turn
             boolean heroIsDead = rpg.duel(monster, hero);
             if (heroIsDead) break;
-
-            System.out.printf("%s\n%s\n", hero, monster);
+			
+			hero.setStun(hero.getStun() -1);
+			monster.setStun(monster.getStun() -1);
         }
-
-        System.out.printf("%s\n%s\n", hero, monster);
+		clearScr();
+		System.out.println("== round " + ++count);
+        	
+        	 System.out.printf("%s\n versus \n\n%s\n", hero, monster);
+        
     }
 }

@@ -10,9 +10,11 @@ public abstract class Hero extends RPGCharacter {
 	private int intelligence; //affects skill cooldown, adds damage to some skills, and damage reduction to some classes
 	private int skillCD; //  skill cooldowns to be implemented in the attack method of all subclasses
 	
+	
 	//constructor for a generic hero with base stats all set to 10
     public Hero(String name, int hp, int level) {
         super(name, hp);
+		
         this.level = level;
 		this.strength = 10;
 		this.agility = 10;
@@ -62,5 +64,10 @@ public abstract class Hero extends RPGCharacter {
 	public void setSkillCD(int n){
 		this.skillCD = n;
 	}
+	
+	 public String toString(){
+	    	return "Name: "+this.getName()+super.toString()+ "\n Level "+getLevel();
+	    	
+	    }
 
 }
