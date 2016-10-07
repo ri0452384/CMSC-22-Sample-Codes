@@ -1,3 +1,4 @@
+package lab8part2;
 
 public class Square extends Rectangle {
 

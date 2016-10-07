@@ -1,3 +1,4 @@
+package lab8part2;
 
 public class Triangle extends Shape {
 	
@@ -17,7 +18,7 @@ public class Triangle extends Shape {
 			side2 = s2;
 			side3 = s3;
 		}else{
-			throw new Exception("Invalid side/s found!");
+			throw new IllegalArgumentException("Invalid side/s found!");
 		}
 	}
 	
