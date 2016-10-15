@@ -52,11 +52,12 @@ public class Student {
 		}
 		
 		public String toString(){
-			return "Student Number: "+studentNumber+
+			/*return "Student Number: "+studentNumber+
 					"\nName: "+lastName +", "+ firstName+" "+ middleInitial+"."+
 					"\nProgram: "+course+
-					"\nYear Level: "+yearLevel+"\n";		
-			//return studentNumber+","+lastName+","+firstName+","+middleInitial+","+course+","+yearLevel+"\n";
+					"\nYear Level: "+yearLevel+"\n";	
+					*/	
+			return studentNumber+"\n"+lastName+"\n"+firstName+"\n"+middleInitial+"\n"+course+"\n"+yearLevel+"\n";
 		}
 		
 }

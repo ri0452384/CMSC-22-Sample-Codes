@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,7 +15,7 @@ import static java.nio.file.StandardOpenOption.*;
 
 public class StudentMain {
 	
-	ArrayList<Student> students  = new ArrayList<Student>();
+	ArrayList<Student> students  = new ArrayList<>();
 	
 	
 	
@@ -25,10 +26,9 @@ public class StudentMain {
 		Student stud = new Student();
 		
 		String studNum;
-			do{
 				studNum = sc.nextLine();
 				stud.setStudentNumber(studNum);
-			}while(this.checkStudent(studNum)==false);
+			
 			
 		System.out.println("Please enter First Name: ");
 			stud.setFirstName(sc.nextLine());
@@ -42,18 +42,20 @@ public class StudentMain {
 			stud.setYearLevel(Integer.parseInt(sc.nextLine()));
 			
 			students.add(stud);
-			System.out.println(stud);
 			System.out.println("Student added.");
-		sc.close();
+		
 	}
+	
 	
 	private boolean checkStudent(String studNum){
 		
 		boolean found = false;
 		for(Student st:students){
-			if(st.getStudentNumber().equals(studNum)){
-				System.out.println(st);
-					found = true;
+				if(st != null){
+					if(st.getStudentNumber().equals(studNum)){
+						System.out.println(st);
+						found = true;
+				}
 			}
 		}
 		
@@ -65,13 +67,20 @@ public class StudentMain {
 		System.out.println("Enter student number: ");
 		Scanner sc = new Scanner(System.in);
 		String studNum = sc.nextLine();
-		
+		Boolean foundStudent = false;
 		for(Student st:students){
 			if(st.getStudentNumber().equals(studNum)){
-				System.out.println(st);		
+				System.out.println("Student Number: " + st.getStudentNumber()
+									+"\nName: "+st.getLastName()+ ", " +st.getFirstName()+" "+st.getMiddleInitial()+".\n"
+									+"Course: "+st.getCourse()
+									+"\nYear Level: "+st.getYearLevel());	
+                                foundStudent = true;
+                                break;
 			}
 		}
-		sc.close();
+                if(!foundStudent){
+                    System.out.println("No Student Found");
+                }
 	}
 	
 	
@@ -80,26 +89,65 @@ public class StudentMain {
 		System.out.println("Enter student number: ");
 		Scanner sc = new Scanner(System.in);
 		String studNum = sc.nextLine();
+                Boolean foundStudent = false;
 		
 		for(Student st:students){
 			if(st.getStudentNumber().equals(studNum)){
 				
 				students.remove(st);
-						
+                                System.out.println("Student Removed!");
+                                foundStudent = true;
+			        break;
 			}
 		}
-		sc.close();
-		
+                if(!foundStudent){
+                    System.out.println("No Student Found");
+                }
 	}
+	
+	
 	//method to save the list into a file labeled db.txt
 	public void save(){
+		
 		Path p = Paths.get("db.txt");
-		try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(p, CREATE, APPEND))) {
-			    for(Student st : students){
-			    	byte[] data = st.toString().getBytes();
-			    	out.write(data, 0, data.length);
+		
+		
+		try (OutputStream out = new PrintStream(Files.newOutputStream(p, CREATE, APPEND))) {
+			this.open();
+			
+			for(Student st : students){
+				
+				//
+					
+					    	byte[] data = st.getStudentNumber().getBytes();
+					    	out.write(data);
+					    	((PrintStream) out).append("\r\n"); 
+					    	
+					    	data = st.getLastName().getBytes();
+					    	out.write(data);
+					    	((PrintStream) out).append("\r\n"); 
+					    	 
+					    	data = st.getFirstName().getBytes();
+					    	out.write(data);
+					    	((PrintStream) out).append("\r\n"); 
+					    	
+					    	data = Character.toString(st.getMiddleInitial()).getBytes();
+					    	out.write(data);
+					    	((PrintStream) out).append("\r\n"); 
+					    	
+					    	data = st.getCourse().getBytes();
+					    	out.write(data);
+					    	((PrintStream) out).append("\r\n"); 
+					    	
+					    	data = Integer.toString(st.getYearLevel()).getBytes();
+					    	out.write(data);
+					    	((PrintStream) out).append("\r\n"); 
+						//}
+			    	
 			    }  
-			    	out.close();
+			    
+			
+			out.close();
 			    } catch (IOException x) {
 			      System.err.println(x);
 			    }finally{
@@ -112,18 +160,66 @@ public class StudentMain {
 	//method that should be used to open an existing file, or create it if it doesn't exist
 	public void open(){
 		
-		Path file = Paths.get("./db.txt");
+		Path file = Paths.get("db.txt");
 		
-		String studNum;
-		try (InputStream in = Files.newInputStream(file);
+		
+		//String studNum;
+		try (	InputStream in = Files.newInputStream(file);
 			    BufferedReader reader =
-			      new BufferedReader(new InputStreamReader(in))) {
-			    String line = null;
+			    				new BufferedReader(new InputStreamReader(in))) {
+			    String line;
+                            int counter = 1;
 			    while ((line = reader.readLine()) != null) {
-			        //to do reading from file here
-			    	studNum = line;
-			    	//not yet implemented: reading the rest of the file
+			        Student stud = new Student();
+			       //line is initially the student number, need to perform checking before adding to the list
+			        
+                                switch(counter){
+                                    case 1:{
+                                        stud.setStudentNumber(line);
+                                        System.out.println(line);
+                                        counter++;
+                                    }
+                                    case 2:{
+                                    	line = reader.readLine();
+                                        stud.setLastName(line);
+                                        System.out.println(line);
+                                        counter++;
+                                    }
+                                    case 3:{
+                                    	line = reader.readLine();
+                                        stud.setFirstName(line);
+                                        System.out.println(line);
+                                        counter++;
+                                    }
+                                    case 4:{
+                                    	
+                                        line = reader.readLine();
+                                        stud.setMiddleInitial(line.charAt(0));
+                                        System.out.println(line);
+                                        counter++;
+                                    }
+                                    case 5:{
+                                    	line = reader.readLine();
+                                        stud.setCourse(line);
+                                        System.out.println(line);
+                                        counter++;
+                                    }
+                                    case 6:{
+                                    	line = reader.readLine();
+                                        stud.setYearLevel(Integer.parseInt(line));
+                                        System.out.println(line);
+                                        counter++;
+                                    }   
+                                   
+                                    students.add(stud);
+                                    counter = 1;
+                                }
+			        
+                                
+                                	
+                                
 			        }
+			    reader.close();
 			    
 			} catch (IOException x) {
 			    System.err.println(x);
@@ -139,10 +235,12 @@ public class StudentMain {
 	Scanner sc = new Scanner(System.in);
 	boolean exit = false;
 	StudentMain mein = new StudentMain();
+		mein.save();
+        
 	
 	while(exit==false){
 	
-			System.out.println("1 - Register a student \n2 - Search by Student Number \n 3 - Delete a student \n 4 - Save \n 5 - Exit");
+			System.out.println(" 1 - Register a student \n 2 - Search by Student Number \n 3 - Delete a student \n 4 - Save \n 5 - Exit");
 			
 			
 			int choice = sc.nextInt();
@@ -165,6 +263,7 @@ public class StudentMain {
 					
 				}case 5:{
 					exit = true;
+					break;
 				}
 				
 				default:{
