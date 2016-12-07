@@ -1,69 +1,70 @@
 
-import java.util.Scanner;
-
 public class RuleThirty extends Thread{
 	
 	int threads;
 	int[] ruleset = new int[]{0,0,0,1,1,1,1,0}; //to follow rule 30, can be changed to any other type of rule later on
 	int generation = 0;
-	int[][] cells; //for this exercise I used a 2d array
+	int[] current;
+	int[] next;
 	int width; // to be used as the number of cells per row
 	int input; // to be used as number of rows
 	
 		
 	public void run(){
 	if(input<=0){
-		System.out.println("Number must be greater than zero!"); //exception handling(lol)
-		}
+		System.out.println("Number must be greater than zero!"); 	}
 	width = 2*(input - 1) +1;
-	threads = (int)( width / 10);
 	//width = input; //since we have to generate a square array
-	cells = new int[input][width];
-		generate(1,width);
+	current = new int[width];
+	generate(1,input);
+	
 	}
 	
 	private void generate(int min,int max){
 		
 		//this block is for generating the entire first row only
+		if(input == 1)
 				for (int f = 0; f < width-1; f++) {
-				cells[0][f] = 0;
+				current[f] = 0;
+				//System.out.print(current[f]);
 				}
 				//All cells start with state 0, except the center cell has state 1.
-				cells[0][width/2] = 1;
-				
-		
+				current[width/2] = 1;
+				//for(int j=0;j<current.length;j++)
+					//System.out.print(current[j]);
+				//System.out.println("");
+				 
 		for(int i=1;i<input;i++){
-			int[] nextgen = new int [width];
+			next = new int [width];
 				
 			for(int j=0;j<width;j++){
 				
 				int left, mid, right;
 				if(j==0){
 					left=0;
-					mid = cells[generation][j];
-					right  = cells[generation][j+1];
+					mid = current[j];
+					right  = current[j+1];
 				}
 				else if(j==width-1){ 
-					left   = cells[generation][j-1];
-					mid    = cells[generation][j];
+					left   =current[j-1];
+					mid    = current[j];
 					right=0;
 					}
 				else{
-				left   = cells[generation][j-1];
-				mid    = cells[generation][j];
-				right  = cells[generation][j+1];
+				left   = current[j-1];
+				mid    = current[j];
+				right  = current[j+1];
 				}
-				nextgen[j] = rules(left, mid, right);
-				cells[i][j] = nextgen[j];
-				System.out.print(nextgen[j]);
+				next[j] = rules(left, mid, right);
+				//current[j] = next[j];
+				
+				
 				}
-				//Increment the generation counter.
-				cells[i]=nextgen;
-				generation++;
-				System.out.print("\n");
+				current = next;	
 			}
-	 
-		//transition of 1 row
+		for(int i=0;i<current.length;i++){
+			System.out.print(current[i]);
+		}
 	}
 	
 	
@@ -81,11 +82,5 @@ public class RuleThirty extends Thread{
 	else return 0;
     }
 
-	public static void main(String[] args){	
-		RuleThirty thirty = new RuleThirty();
-	Scanner s = new Scanner(System.in);
-	int number = s.nextInt();
-	thirty.input = number;
-	thirty.run();
-}
+	
 }
